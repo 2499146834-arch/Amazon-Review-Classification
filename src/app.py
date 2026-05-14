@@ -9,7 +9,7 @@ from scipy.sparse import hstack, csr_matrix
 
 app = Flask(__name__)
 
-MODEL_DIR = r'D:\Amazon\model'
+MODEL_DIR = r'D:\Amazon\models'
 
 # 初始化 NLTK
 for resource in ['punkt', 'stopwords', 'wordnet', 'omw-1.4']:

@@ -31,9 +31,9 @@ STOP_WORDS = STOP_WORDS - NEGATION_WORDS
 LEMMATIZER = WordNetLemmatizer()
 VADER = SentimentIntensityAnalyzer()
 
-MODEL_DIR = r'D:\Amazon\model'
+MODEL_DIR = r'D:\Amazon\models'
 os.makedirs(MODEL_DIR, exist_ok=True)
-OUTPUT_DIR = r'D:\Amazon\experiment_outputs'
+OUTPUT_DIR = r'D:\Amazon\outputs'
 
 print('Loading data...')
 DATA_LOADED = False

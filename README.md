@@ -10,7 +10,7 @@ A complete machine learning pipeline that classifies Amazon product reviews into
 2. Open `http://127.0.0.1:5002` in browser
 3. Paste an English product review and get instant star rating prediction
 
-![Demo](experiment_outputs/figures/05_model_comparison.png)
+![Demo](outputs/figures/05_model_comparison.png)
 
 ## Features
 
@@ -36,19 +36,26 @@ Best model: **Logistic Regression + TF-IDF** on test set.
 ## Project Structure
 
 ```
-├── app.py                              Flask backend API
-├── train_and_save_model.py             Model training & saving script
-├── improved_experiment.py              Full experiment pipeline
-├── run.bat                             One-click launcher
-├── Big data analysis.json              Raw dataset
-├── Big_data_analysis.pptx              Original experiment slides
-├── templates/
-│   └── index.html                      Frontend UI
-├── model/                              Trained models (generated)
-├── experiment_outputs/
-│   ├── *_Report.docx / *.md            Experiment reports (EN / CN)
-│   ├── *.csv                           Model results & predictions
+├── src/                                Source code
+│   ├── app.py                          Flask backend API
+│   ├── train_and_save_model.py         Model training & saving script
+│   └── improved_experiment.py          Full experiment pipeline
+├── web/                                Web application
+│   ├── run.bat                         One-click launcher
+│   └── templates/
+│       └── index.html                  Frontend UI
+├── data/                               Data files
+│   ├── raw/
+│   │   └── Big data analysis.json      Raw dataset
+│   └── processed/                      Train/val/test splits (generated)
+├── models/                             Trained models (generated)
+├── outputs/                            Experiment outputs
+│   ├── reports/                        Experiment reports (EN / CN)
+│   ├── results/                        Model comparison & predictions
 │   └── figures/                        11 EDA & evaluation charts
+├── presentation/                       Presentation materials
+│   └── Big_data_analysis.pptx
+├── README.md
 └── .gitignore
 ```
 
@@ -65,13 +72,13 @@ Best model: **Logistic Regression + TF-IDF** on test set.
 pip install flask scikit-learn numpy pandas nltk vaderSentiment scipy xgboost lightgbm imbalanced-learn matplotlib seaborn wordcloud
 
 # Train the model (first time only)
-python train_and_save_model.py
+python src/train_and_save_model.py
 
 # Start the server
-python app.py
+python src/app.py
 ```
 
-Or just double-click **`run.bat`**.
+Or just double-click **`web/run.bat`**.
 
 ### API Usage
 

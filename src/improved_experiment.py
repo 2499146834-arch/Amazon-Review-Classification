@@ -71,7 +71,7 @@ np.random.seed(SEED)
 
 
 
-OUTPUT_DIR = r'D:\Amazon\experiment_outputs'
+OUTPUT_DIR = r'D:\Amazon\outputs'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_DIR, 'figures'), exist_ok=True)
 
