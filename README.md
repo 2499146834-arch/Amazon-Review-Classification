@@ -39,11 +39,11 @@ Best model: **Logistic Regression + TF-IDF** on test set.
 ├── src/                                Source code
 │   ├── app.py                          Flask backend API
 │   ├── train_and_save_model.py         Model training & saving script
-│   └── improved_experiment.py          Full experiment pipeline
-├── web/                                Web application
-│   ├── run.bat                         One-click launcher
+│   ├── improved_experiment.py          Full experiment pipeline
 │   └── templates/
 │       └── index.html                  Frontend UI
+├── web/                                Web launcher
+│   └── run.bat                         One-click launcher
 ├── data/                               Data files
 │   ├── raw/
 │   │   └── Big data analysis.json      Raw dataset
