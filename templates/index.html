@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Review Star Rating Predictor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh; color: #e0e0e0;
+    display: flex; justify-content: center; align-items: center; padding: 20px;
+  }
+  .container {
+    max-width: 800px; width: 100%;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px);
+    border-radius: 24px; padding: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  }
+  .header {
+    text-align: center; margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 2em; font-weight: 700;
+    background: linear-gradient(135deg, #f90, #ffc107);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .header p { color: #999; font-size: 0.95em; }
+  .input-section { margin-bottom: 25px; }
+  .input-section textarea {
+    width: 100%; min-height: 140px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 18px;
+    color: #e0e0e0; font-size: 1em; font-family: inherit;
+    resize: vertical; transition: all 0.3s;
+    outline: none;
+  }
+  .input-section textarea:focus {
+    border-color: rgba(255,153,0,0.5);
+    box-shadow: 0 0 30px rgba(255,153,0,0.1);
+  }
+  .input-section textarea::placeholder { color: #666; }
+  .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 30px; }
+  .btn {
+    padding: 12px 32px; border: none; border-radius: 12px;
+    font-size: 1em; font-weight: 600; cursor: pointer;
+    transition: all 0.3s; font-family: inherit;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #f90, #ffa940);
+    color: #1a1a2e; flex: 1;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,153,0,0.3); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-example {
+    background: rgba(255,255,255,0.08); color: #ccc;
+    padding: 12px 20px; font-size: 0.85em;
+  }
+  .btn-example:hover { background: rgba(255,255,255,0.15); }
+  .result { display: none; }
+  .result.show { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .star-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; margin-bottom: 30px;
+  }
+  .star-icon {
+    font-size: 2.5em; transition: all 0.3s;
+    filter: grayscale(1); opacity: 0.3;
+  }
+  .star-icon.active { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
+  .result-label {
+    text-align: center; font-size: 1.4em; font-weight: 700;
+    margin-top: -10px; margin-bottom: 25px;
+    color: #ffa940;
+  }
+  .probs { margin-bottom: 30px; }
+  .prob-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+  }
+  .prob-label { width: 70px; text-align: right; font-weight: 600; font-size: 0.9em; }
+  .prob-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 8px; height: 24px; overflow: hidden; }
+  .prob-bar {
+    height: 100%; border-radius: 8px; transition: width 0.8s ease;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+    font-size: 0.8em; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  .insight-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-top: 25px;
+  }
+  .insight-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px; padding: 16px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .insight-card .val { font-size: 1.6em; font-weight: 700; color: #ffa940; }
+  .insight-card .lbl { font-size: 0.8em; color: #888; margin-top: 4px; }
+  .error-msg { color: #ff4444; text-align: center; margin: 20px 0; font-weight: 600; }
+  .loading-spinner {
+    display: none; text-align: center; margin: 20px 0;
+  }
+  .loading-spinner.show { display: block; }
+  .spinner {
+    display: inline-block; width: 40px; height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #ffa940; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .footer { text-align: center; margin-top: 30px; color: #555; font-size: 0.8em; }
+  @media (max-width: 600px) {
+    .container { padding: 24px; }
+    .header h1 { font-size: 1.5em; }
+    .controls { flex-direction: column; }
+    .star-icon { font-size: 1.8em; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Amazon Review Predictor</h1>
+    <p>Enter a product review and AI will predict the star rating</p>
+  </div>
+
+  <div class="input-section">
+    <textarea id="reviewInput" placeholder="Paste or type an Amazon product review here...&#10;&#10;Example: I absolutely love this product! The quality is outstanding and it was delivered on time. Would highly recommend to anyone looking for a reliable solution."></textarea>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="predictBtn" onclick="predict()">Predict Rating</button>
+    <button class="btn btn-example" onclick="loadExample()">Load Example</button>
+  </div>
+
+  <div class="loading-spinner" id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:10px;color:#888;">Analyzing your review...</p>
+  </div>
+
+  <div class="error-msg" id="error" style="display:none;"></div>
+
+  <div class="result" id="result">
+    <div class="star-row" id="starRow"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="probs" id="probBars"></div>
+    <div class="insight-grid" id="insights"></div>
+  </div>
+
+  <div class="footer">
+    Amazon Review Star Rating Classifier &mdash; ML Powered
+  </div>
+</div>
+
+<script>
+const examples = [
+  "I absolutely love this product! The quality exceeded my expectations and it arrived two days early. Would highly recommend to anyone!",
+  "This is hands down the best purchase I've made this year. Setup was incredibly easy and the performance is outstanding. Five stars!",
+  "It's an okay product for the price. Does the job but nothing special. Build quality feels a bit cheap but it works fine so far.",
+  "Not bad but not great either. The design is decent but there are some missing features I was hoping for. Middle of the road.",
+  "Really disappointed with this purchase. It stopped working after just a few uses and customer service was completely unhelpful. Save your money.",
+  "Complete waste of money. The materials feel incredibly cheap and it broke within the first week. Do not buy this product.",
+  "I was hesitant to buy this but it exceeded my expectations. Battery life has been impressive and it works seamlessly with my other devices.",
+  "The quality is acceptable for the price point. I have some mixed feelings about this. Good enough to keep but probably would not buy again.",
+  "Incredible value for money on this. Shipping was fast and the build quality feels premium. Already ordered another one for a family member.",
+  "This product does the job but I found the setup confusing and the instructions were hard to follow. Three stars.",
+];
+
+function loadExample() {
+  const r = examples[Math.floor(Math.random() * examples.length)];
+  document.getElementById('reviewInput').value = r;
+}
+
+async function predict() {
+  const review = document.getElementById('reviewInput').value.trim();
+  const errorEl = document.getElementById('error');
+  const resultEl = document.getElementById('result');
+  const loadingEl = document.getElementById('loading');
+  const btn = document.getElementById('predictBtn');
+
+  errorEl.style.display = 'none';
+  if (!review) {
+    errorEl.textContent = 'Please enter a review text first.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (review.length < 10) {
+    errorEl.textContent = 'Review is too short. Please enter at least 10 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  loadingEl.classList.add('show');
+  resultEl.classList.remove('show');
+
+  try {
+    const resp = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ review: review })
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      errorEl.textContent = data.error;
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    // 渲染星级
+    let starHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      starHtml += '<span class="star-icon' + (i <= data.predicted_star ? ' active' : '') + '">&#11088;</span>';
+    }
+    document.getElementById('starRow').innerHTML = starHtml;
+
+    // 标签
+    document.getElementById('resultLabel').textContent =
+      'Predicted: ' + data.predicted_label + '  (' + data.confidence.toFixed(1) + '% confidence)';
+
+    // 概率条
+    let probHtml = '';
+    const colors = ['#d62728', '#ff7f0e', '#2ca02c', '#1f77b4', '#9467bd'];
+    data.star_probs.forEach((p, i) => {
+      probHtml += '<div class="prob-row">' +
+        '<span class="prob-label">' + p.label + '</span>' +
+        '<div class="prob-bar-wrap">' +
+          '<div class="prob-bar" style="width:' + p.probability + '%; background:' + colors[p.star - 1] + ';">' +
+            (p.probability > 8 ? p.probability.toFixed(1) + '%' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    document.getElementById('probBars').innerHTML = probHtml;
+
+    // 洞察卡片
+    let sentimentEmoji = '😊';
+    if (data.sentiment === 'Very Positive') sentimentEmoji = '🤩';
+    else if (data.sentiment === 'Negative') sentimentEmoji = '😟';
+    else if (data.sentiment === 'Very Negative') sentimentEmoji = '😡';
+    else if (data.sentiment === 'Neutral') sentimentEmoji = '😐';
+
+    document.getElementById('insights').innerHTML =
+      '<div class="insight-card"><div class="val">' + sentimentEmoji + '</div><div class="lbl">' + data.sentiment + '</div></div>' +
+      '<div class="insight-card"><div class="val">' + data.word_count + '</div><div class="lbl">Word Count</div></div>' +
+      '<div class="insight-card"><div class="val">' + (data.vader_compound >= 0 ? '+' : '') + data.vader_compound.toFixed(2) + '</div><div class="lbl">VADER Compound</div></div>' +
+      '<div class="insight-card"><div class="val">' + Math.round(data.vader_pos * 100) + '%</div><div class="lbl">Positive Tone</div></div>' +
+      '<div class="insight-card"><div class="val">' + Math.round(data.vader_neg * 100) + '%</div><div class="lbl">Negative Tone</div></div>';
+
+    resultEl.classList.add('show');
+  } catch (err) {
+    errorEl.textContent = 'Connection error. Is the server running?';
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    loadingEl.classList.remove('show');
+  }
+}
+
+// Enter key to submit
+document.getElementById('reviewInput').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'Enter') predict();
+});
+</script>
+</body>
+</html>

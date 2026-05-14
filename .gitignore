@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+venv/
+env/
+
+# Model files (large generated files)
+model/*.pkl
+
+# Experiment output data files (generated CSVs)
+experiment_outputs/train_data.csv
+experiment_outputs/val_data.csv
+experiment_outputs/test_data.csv
+experiment_outputs/test_predictions.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
